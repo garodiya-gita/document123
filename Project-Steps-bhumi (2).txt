@@ -1,0 +1,542 @@
+
+First Make Theme Folder After Make this files
+header.php - footer.php - style.css - index2.php - functions.php - single.php - page.php - 404.php - screenshot.png
+make front-page.php for home(like index page) in wordpress
+
+Add code in index.php - page.php - single.php files
+<?php
+get_header();
+?>
+<section>
+  <div class="container">       
+       <?php
+      if ( have_posts() ) :
+        while ( have_posts() ) : the_post();
+        the_content();
+        endwhile;
+        endif;
+        ?>   
+  </div>
+</section>
+<?php
+get_footer();
+?>
+
+copy header data in to header.php file 
+copy footer data in to footer.php file 
+copy body part in front-page.php
+put it in header 
+<html> tag include = <html <?php language_attributes(); ?> lang="en">
+
+<meta charset="utf-8"> = <meta charset="<?php bloginfo('charset');?>">
+<link rel="stylesheet" href="<?php echo get_stylesheet_uri();?>">  //call css
+before all css and js included file = <?php echo get_template_directory_uri() ?>/
+
+before </head> in header.php =  <?php wp_head();?>
+in<body> = <body <?php body_class();?>>
+
+before </body> in footer.php = <?php wp_footer(); ?>
+
+
+
+in style.css add code :
+ /*
+Theme Name: Deneb
+Theme URI: http://localhost/deneb/
+Author: Green Cubes
+Author URI: http://localhost/deneb/
+Description: My Site
+Version: 1.0
+Tags: bootstrap
+*/
+
+
+ 
+
+in front-page.php put:
+<?php
+/*
+  Template Name: front page
+ */
+ get_header();
+ ?>
+<?php
+get_footer();
+?>
+
+->admin side installed wordpress create database and activate theme then create page - Home page
+Then  go to 
+ Settings menu ->Reading -> select static page[Home page] then do Save Change.
+
+Settings menu-> Permalinks: select Post name
+In Apperence -> activate theme of template project
+
+Add Custom Fields = Advanced Custom Fields PRO(Plugin)
+
+Create Functions File = 
+	<?php
+	session_start();
+	add_theme_support('menus');
+	function my_primary_menu()
+	{
+	 register_nav_menus(array(
+	 'primary'=>__('Top Menu'),
+	 'footer' => __('Footer Menu')
+	 ));
+	}
+	add_action('init','my_primary_menu');
+	add_theme_support('widgets');
+	add_theme_support('custom-logo');
+	add_theme_support( 'title-tag' );
+	add_theme_support('woocommerce');
+	add_theme_support( 'wc-product-gallery-zoom' );
+	add_theme_support( 'wc-product-gallery-lightbox' );
+        add_theme_support( 'wc-product-gallery-slider' );
+	add_theme_support( 'post-thumbnails' ); 	//	it's required for support image fetch
+	function add_link_atts($atts) {
+	  $atts['class'] = "nav-link";
+	  return $atts;
+	}
+	add_filter( 'nav_menu_link_attributes', 'add_link_atts');
+	add_filter( 'nav_menu_css_class', function($classes) {
+		$classes[] = 'nav-item';
+		return $classes;
+	}, 10, 1 );
+	?>
+
+Create Customize Section in Functions File = 
+$wp_customize->add_section('social_link_section', array(
+  'title'          => 'Social Section',
+  'priority'   => 31
+));
+
+// All widgets in Functions File
+function first_widgets_init() {
+	register_sidebar( array(
+		'name'          => __( 'Footer Area 1', 'first' ),
+		'id'            => 'footer-1',
+		'description'   => __( 'Add widgets here to appear in your sidebar.', 'first' ),
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</aside>',
+		'before_title'  => '<h5 class="widget-title">',
+		'after_title'   => '</h5>',
+	) );
+	register_sidebar( array(
+		'name'          => __( 'Sidebar-Menu', 'first' ),
+		'id'            => 'sidebar-menu',
+		'description'   => __( 'Add widgets here to appear in your sidebar.', 'first' ),
+		'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+		'after_widget'  => '</aside>',
+		'before_title'  => '<h5 class="widget-title">',
+		'after_title'   => '</h5>',
+	) );	
+}
+
+Create Customize Link in Functions File = 
+$wp_customize->add_setting('facebook_link', array(
+  'default'  => '#',
+));
+$wp_customize->add_control('facebook_link', array(
+  'label'   => 'Facebook Link',
+  'section' => 'social_link_section',
+  'type'    => 'text',
+));
+
+Create Customize Image in Functions File = 
+$wp_customize->add_setting('instagram_img', array(
+  'default'  => '',
+  'type'     => 'theme_mod',
+  'capability' => 'edit_theme_options',
+));
+$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'instagram_img', array(
+  'label' => __( 'Instagram Image', 'rebelfish' ),
+  'section' => 'social_link_section',
+  'settings' => 'instagram_img',
+))
+);
+
+Create Customize Color in Functions File = 
+$wp_customize->add_setting('footer_color', array(
+  'default' => '#000',
+    'sanitize_callback' => 'sanitize_hex_color',
+));
+$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'footer_color', array(
+	'label'      => __( 'Footer Backgound Color', 'rebelfish' ),
+	'section'    => 'bgcolor_section',
+	'settings'   => 'footer_color',
+)) 
+);
+
+Create Customize for Select File 
+$wp_customize->add_setting('customizer_pdf', array(
+        'transport'         => 'refresh'
+));
+
+	
+$wp_customize->add_control( new WP_Customize_Upload_Control( $wp_customize, 'customizer_pdf', array(
+        'label'             => __('ISO PDF', 'sealth'),
+        'section'           => 'footer_section',
+        'settings'          => 'customizer_pdf',    
+)));
+
+
+Add Class in Menu in Functions File=
+add_filter('nav_menu_css_class' , 'special_nav_class' , 10 , 1);
+function special_nav_class ($classes) {
+   if (in_array('menu-item-has-children', $classes) ){
+       $classes[] = 'dropdown-holder';
+   }
+   return $classes;
+}
+
+custom logo = <a href="<?php echo home_url(); ?>" class="navbar-brand">
+				
+		<?php                    
+		$custom_logo_id = get_theme_mod('custom_logo');                    
+		$image = wp_get_attachment_image_src($custom_logo_id, 'full');                          
+		if (has_custom_logo()) {                    	
+			_e('<img src="' . $image[0] . '" alt="" class="img-responsive">');                    
+		} else {                    	
+			_e('<span class="site-name">' . esc_attr(get_bloginfo('name')) . '</span>');                    
+		}                 
+		?>
+</a>
+
+main menu = <?php		
+$defaults = array('menu' => '',
+ 		'container' => '',
+ 		'container_class' => '',
+ 		'container_id' => '',
+ 		'menu_class' => 'nav navbar-nav navbar-center',
+ 		'menu_id' => '',
+ 		'echo' => true,
+ 		'fallback_cb' => 'wp_page_menu',
+ 		'before' => '', 
+ 		'after' => '',
+ 		'link_before' => '',
+ 		'link_after' => '',
+ 		'items_wrap' => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+ 		'item_spacing' => 'preserve',
+
+ 		'depth' => 0,
+ 		'walker' => '',
+ 		'theme_location' => 'primary');
+ 		 wp_nav_menu($defaults); ?>
+
+template page include = 
+<?php
+/*
+ * Template Name: Home Page
+ */
+?>
+
+include header = <?php get_header(); 
+
+include footer = <?php get_footer(); 
+
+page title = <?php wp_title('');?>
+
+page content = 
+<?php
+	wp_reset_query(); // necessary to reset query
+	while (have_posts()): the_post();
+		the_content();
+	endwhile; // End of the loop.
+?>
+
+//Add Class Menu Li
+add_filter( 'nav_menu_css_class', 'menu_item_classes', 10, 4 );
+function menu_item_classes( $classes, $item, $args, $depth ) {
+    $classes[] = 'dropdown';
+    return $classes;
+}
+//Add Class Menu li a
+add_filter( 'nav_menu_link_attributes', function($atts) {
+        $atts['class'] = "nav-link dropdown-toggle";
+        $atts['data-toggle'] = "dropdown";
+        return $atts;
+}, 100, 1 );
+//Add Class Menu li a ui
+function change_submenu_class($menu) {  
+  $menu = preg_replace('/ class="sub-menu"/','/ class="sub-menu dropdown-menu" /',$menu);  
+  return $menu;  
+}  
+add_filter('wp_nav_menu','change_submenu_class');  
+
+
+page feature image include = <?php the_post_thumbnail('post-thumbnails'); ?>
+
+add custom fields = <?php echo get_field('your-fieldname'); ?>
+
+get page/post thumbnail image = $featured_img_url = get_the_post_thumbnail_url(get_the_ID());
+
+repeater field = 
+		<?php        
+		// check if the repeater field has rows of data        
+		if (have_rows('year_years_text')):        	
+		// loop through the rows of data        	
+		while (have_rows('year_years_text')): the_row();        		
+		?>        						            
+		   <div class="client-block block-left-border">        									
+		   <h1><?php echo get_sub_field('year_title'); ?></h1>
+           <p><?php echo get_sub_field('year_text'); ?></p>        								    
+		  </div>        						        
+		<?php        	
+		endwhile;        
+		else:        	
+		// no rows found        
+		endif;       
+		?>
+
+post include = 
+		<?php                    
+		$posts = get_posts(array('post_type' => 'client', 'order' => 'ASC'));                                
+		foreach ($posts as $post) {                    	
+		$img1 = wp_get_attachment_image_url($post_thumbnail_id = get_post_thumbnail_id($post->ID), 'full');
+        get_the_post_thumbnail();                    	
+		$get_title = $post->post_title;                    	
+		$data = $post->post_content;
+		$taxonomy1 =  array('taxonomy' => 'designation');
+		$terms1 = wp_get_post_terms( $post->ID, $taxonomy1 );
+		$v1=convert($terms1);                  
+		?>			   
+		<div>			  	
+		<img src="<?php echo $img1; ?>" class="img-responsive feature_client_img" alt="">			  	
+		<div class="feature_client-contant">			  		
+		<h2><?php echo $get_title; ?></h2>			  		
+		<?php echo $data; ?>			  	
+		</div>		  
+		</div>			  
+		<?php }?>
+
+footer widget include = <?php dynamic_sidebar('footer-1');?>
+
+customized include all fields = <?php echo get_theme_mod('your_fieldname'); ?>
+
+add new post in wordpress (in functions.php) = 
+	function client() 
+	{	
+		//$menu_icon = 				
+		get_template_directory_uri().'/images/recipe.png';	
+		$labels = array(		
+		'name' => _x('Clients', 'post type general name'),		
+		'singular_name' => _x('Client', 'post type singular name'),		
+		'add_new' => _x('Add New', 'client'),		
+		'add_new_item' => __('Add New Client'),		
+		'edit_item' => __('Edit Client'),		
+		'new_item' => __('New Client'),		
+		'view_item' => __('View Client'),		
+		'search_items' => __('Search Client'),		
+		'not_found' => __('Nothing found'),		
+		'not_found_in_trash' => __('Nothing found in Trash'),		
+		'parent_item_colon' => '',	
+	);
+	$args = array(		
+		'labels' => $labels,		
+		'public' => true,		
+		'publicly_queryable' => true,		
+		'show_ui' => true,		
+		'query_var' => true,		
+		'rewrite' => true,		
+		'capability_type' => 'post',		
+		'hierarchical' => false,		
+		'menu_position' => 10,		
+		'menu_icon' => $menu_icon,		
+		'supports' => array('title', 'editor', 'thumbnail', 'page-attributes'),	
+	);
+	register_post_type('client', $args);
+	}
+	add_action('init', 'client');
+	
+Using Plugin add custom post = 
+	Custom Post Type UI(Plugin)
+
+add metabox in page (in functions.php) =
+	function lv_get_meta_box($meta_boxes) 
+	{	
+		$prefix = 'lv-';	
+		$meta_boxes[] = array(		
+		'id' => 'famous_meta_box',		
+		'title' => esc_html__('Famous Metabox', 'metabox-online-generator'),		
+		'post_types' => array('product'),		
+		'context' => 'after_editor',		
+		'priority' => 'default',		
+		'autosave' => 'true',		
+		'fields' => array(			
+			array(				
+			'id' => $prefix . 'checkbox_list_1',				
+			'name' => esc_html__('Famous options List', 'metabox-online-generator'),
+			'type' => 'checkbox_list',				
+			'options' => array(					
+			    'Popular' => 'Popular',					
+			    'Custom' => 'Custom',					
+			    'Featured' => 'Featured',				
+			    ),			
+			),		
+		),	
+	);	
+	return $meta_boxes;
+	}
+	add_filter('rwmb_meta_boxes', 'lv_get_meta_box');
+
+
+post pagination = 
+	https://stackoverflow.com/questions/41738362/how-to-include-pagination-in-a-wordpress-custom-post-type-query
+
+	  <?php
+			$the_query=new WP_Query(array(
+			'orderby' => 'ID',
+			'post_type'=>'blogs',
+			'posts_per_page'=>6,
+			'paged' => get_query_var('paged') ? get_query_var('paged') : 1));
+			 while ($the_query -> have_posts()) : $the_query -> the_post();
+			$img=wp_get_attachment_image_url($post_thumbnail_id = get_post_thumbnail_id( $post->ID),'full');
+			    $content = $post->post_content;
+			    $trimmed_content = wp_trim_words( $content, 22, NULL );
+			?>
+        <div class="col-md-6 col-xs-12 right">
+  				<div class="blog-details">
+  					<img src="<?php echo $img; ?>" class="img-responsive blog" alt="">
+  					<div class="blog-box">
+  						<h4>  <?php echo get_the_title(); ?></h4>
+  						<p> <?php echo get_the_date( 'F j, Y',$post->ID ); ?></p>
+  					</div>
+  				</div>
+  			</div>
+			<?php
+            endwhile;
+            $pagination = array(
+                'base' => str_replace( $big, '%#%', get_pagenum_link( $big ) ),
+                'format' => '?paged=%#%',
+                'total' => $the_query->max_num_pages,
+                'current' => max( 1, get_query_var('paged') ),
+               'prev_text' => __('Previous'),
+                'next_text' => __('Next'),
+                'end_size' => 1,
+                'mid_size' => 1,
+                'show_all' => true,
+                'type' => 'array'
+            );
+            if ( $wp_rewrite->using_permalinks() )
+                    $pagination['base'] = user_trailingslashit( trailingslashit( remove_query_arg( 's', get_pagenum_link( 1 ) ) ) . 'page/%#%/', 'paged' );
+            if ( !empty( $wp_query->query_vars['s'] ) )
+                    $pagination['add_args'] = array( 's' => get_query_var( 's' ) );
+            $pages = paginate_links( $pagination );
+            echo '<nav aria-label="Page navigation example">';
+            echo '<div class="blog-pagination"><ul class="pagination">';
+            $paged1 = $paged + 1;
+
+            if ( $paged1 == 1) echo '<li class="page-item disabled"><a href="#" class="page-link" tabindex="-1">Previous</a></li>';
+            foreach ($pages as $page) :
+                echo '<li class="page-item link_hide">'.$page.'</li>';
+            endforeach;
+            if ( $paged ==  $the_query->max_num_pages ) echo '<li class="page-item1 disabled"><a href="#" class="page-link">Next</a></li>';
+            echo '</ul></div></nav>';
+            wp_reset_postdata();
+		?>
+
+//Add Custom metabox
+// meta post teams
+add_action( 'add_meta_boxes', 'teams_meta_box_add' );
+// add function
+function teams_meta_box_add()	
+{
+    add_meta_box( 'teams-meta-box-id', 'Teams', 'teams_meta_box_cb', array('teams'), 'normal', 'high' );
+}
+// function for design
+function teams_meta_box_cb($post_id){
+	$data3=get_post_meta( $post_id->ID,'custom_field_teams');
+	$meta_data1 = json_decode($data3[0]);
+	//print_r($meta_data1);
+	?>
+	<label>Email Link</label><br/>
+	<input type="text" name="link" id="link" value="<?php echo $meta_data1->link; ?>" class="col-md-12" /><br/>
+	<hr/>
+    <?php
+}
+add_action( 'save_post', 'teams_meta_box_save' );
+// save function
+function teams_meta_box_save($post_id){
+	$project = json_encode(array("link"=>$_POST['link']));
+	 update_post_meta( $post_id, 'custom_field_teams',$project );
+}
+///////////////sub menu ma class add krva/////////////
+//Add Class Menu Li
+add_filter( 'nav_menu_css_class', 'menu_item_classes', 10, 4 );
+function menu_item_classes( $classes, $item, $args, $depth ) {
+    $classes[] = 'dropdown';
+    return $classes;
+}
+//Add Class Menu li a
+add_filter( 'nav_menu_link_attributes', function($atts) {
+        $atts['class'] = "nav-link dropdown-toggle";
+        $atts['data-toggle'] = "dropdown";
+        return $atts;
+}, 100, 1 );
+//Add Class Menu li a ui
+function change_submenu_class($menu) {
+  $menu = preg_replace('/ class="sub-menu"/','/ class="sub-menu dropdown-menu" /',$menu);
+  return $menu;
+}
+add_filter('wp_nav_menu','change_submenu_class');
+
+/* Disable plugin update notification */
+function filter_plugin_updates( $value ) {
+    unset( $value->response['woo-donations/woo-donations.php'] );
+    unset( $value->response['checkout/woocommerce-opc.php'] );
+    unset( $value->response['advanced-custom-fields-pro/acf.php'] );
+    return $value;
+}
+add_filter( 'site_transient_update_plugins', 'filter_plugin_updates' );
+
+
+//add custom post type
+// Product Custom Post Type
+function product_init() {
+    // set up product labels
+    $labels = array(
+        'name' => 'Products',
+        'singular_name' => 'Product',
+        'add_new' => 'Add New Product',
+        'add_new_item' => 'Add New Product',
+        'edit_item' => 'Edit Product',
+        'new_item' => 'New Product',
+        'all_items' => 'All Products',
+        'view_item' => 'View Product',
+        'search_items' => 'Search Products',
+        'not_found' =>  'No Products Found',
+        'not_found_in_trash' => 'No Products found in Trash', 
+        'parent_item_colon' => '',
+        'menu_name' => 'Products',
+    );
+    
+    // register post type
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'show_ui' => true,
+        'capability_type' => 'post',
+        'hierarchical' => false,
+        'rewrite' => array('slug' => 'product'),
+        'query_var' => true,
+        'menu_icon' => 'dashicons-randomize',
+        'supports' => array(
+            'title',
+            'editor',
+            'excerpt',
+            'trackbacks',
+            'custom-fields',
+            'comments',
+            'revisions',
+            'thumbnail',
+            'author',
+            'page-attributes'
+        )
+    );
+    register_post_type( 'product', $args );
+    
+    // register taxonomy
+    register_taxonomy('product_category', 'product', array('hierarchical' => true, 'label' => 'Category', 'query_var' => true, 'rewrite' => array( 'slug' => 'product-category' )));
+}
+add_action( 'init', 'product_init' );
